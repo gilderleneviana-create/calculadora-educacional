@@ -5,12 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calculadora Educacional</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
-
 <style>
 body {
+  margin: 0;
   font-family: Arial;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -21,45 +20,45 @@ body {
   background: white;
   padding: 20px;
   border-radius: 15px;
-  width: 340px;
+  width: 320px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+h2 {
+  text-align: center;
 }
 
 input {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   font-size: 18px;
   margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 5px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
 button {
   padding: 12px;
-  font-size: 16px;
+  font-size: 18px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #4CAF50;
   color: white;
+  cursor: pointer;
 }
 
 button:hover {
   background: #45a049;
 }
 
-.igual {
-  background: #2196F3;
-}
-
-.apagar {
-  background: #ff9800;
-}
-
-.limpar {
-  background: #f44336;
+.clear {
+  background: red;
 }
 
 .resultado {
@@ -68,8 +67,8 @@ button:hover {
 }
 
 .passos {
-  font-size: 14px;
   margin-top: 10px;
+  font-size: 14px;
 }
 </style>
 </head>
@@ -77,9 +76,9 @@ button:hover {
 <body>
 
 <div class="container">
-<h3>Calculadora Educacional</h3>
+<h2>Calculadora</h2>
 
-<input id="exp" placeholder="Ex: -(3+[2-5])*2">
+<input id="exp" placeholder="Ex: -[5+(3-2)*4]">
 
 <div class="grid">
 <button onclick="add('7')">7</button>
@@ -98,20 +97,20 @@ button:hover {
 <button onclick="add('-')">-</button>
 
 <button onclick="add('0')">0</button>
-<button onclick="add('+')">+</button>
-<button onclick="add('.')">.</button>
-<button class="apagar" onclick="apagar()">⌫</button>
-
 <button onclick="add('(')">(</button>
 <button onclick="add(')')">)</button>
+<button onclick="add('+')">+</button>
+
 <button onclick="add('[')">[</button>
 <button onclick="add(']')">]</button>
-
 <button onclick="add('{')">{</button>
 <button onclick="add('}')">}</button>
-<button class="limpar" onclick="limpar()">C</button>
-<button class="igual" onclick="calcular()">=</button>
 </div>
+
+<br>
+
+<button onclick="calcular()">Calcular</button>
+<button class="clear" onclick="limpar()">Apagar</button>
 
 <div class="resultado" id="res"></div>
 <div class="passos" id="passos"></div>
@@ -120,67 +119,46 @@ button:hover {
 
 <script>
 
-function add(v){
-  document.getElementById("exp").value += v;
+function add(v) {
+  document.getElementById('exp').value += v;
 }
 
-function limpar(){
-  document.getElementById("exp").value = "";
+function limpar() {
+  document.getElementById('exp').value = "";
+  document.getElementById('res').innerHTML = "";
+  document.getElementById('passos').innerHTML = "";
 }
 
-function apagar(){
-  let campo = document.getElementById("exp");
-  campo.value = campo.value.slice(0,-1);
-}
-
-// converter colchetes/chaves
-function normalizar(exp){
+function normalizar(exp) {
   return exp
-    .replace(/\[/g,"(")
-    .replace(/\]/g,")")
-    .replace(/{/g,"(")
-    .replace(/}/g,")");
+    .replace(/\[/g, "(")
+    .replace(/\]/g, ")")
+    .replace(/\{/g, "(")
+    .replace(/\}/g, ")");
 }
 
-// explicar sinais
-function explicarSinais(exp){
-  let texto = "";
-
-  if(exp.includes("--")) texto += "• Menos com menos vira mais<br>";
-  if(exp.includes("+-")) texto += "• Mais com menos continua menos<br>";
-  if(exp.includes("-+")) texto += "• Menos com mais continua menos<br>";
-
-  return texto;
-}
-
-function calcular(){
+function calcular() {
   let exp = document.getElementById("exp").value;
   let passos = "<b>Passo a passo:</b><br>";
 
-  try{
+  try {
+    passos += "Expressão: " + exp + "<br>";
 
-    passos += "1) Expressão: " + exp + "<br>";
+    let expJS = normalizar(exp);
 
-    // explicar sinais
-    passos += explicarSinais(exp);
+    let resultado = eval(expJS);
 
-    // normalizar
-    let normal = normalizar(exp);
-    passos += "2) Converter [] {} → (): " + normal + "<br>";
-
-    passos += "3) Resolver respeitando ordem:<br>";
-    passos += "• Parênteses → Multiplicação/Divisão → Soma/Subtração<br>";
-
-    let resultado = math.evaluate(normal);
-
-    passos += "4) Resultado final: " + resultado;
+    passos += "Resolvendo respeitando a ordem:<br>";
+    passos += "1) Parênteses / colchetes<br>";
+    passos += "2) Multiplicação e divisão<br>";
+    passos += "3) Soma e subtração<br>";
 
     document.getElementById("res").innerHTML = "Resultado: " + resultado;
     document.getElementById("passos").innerHTML = passos;
 
-  }catch(e){
-    document.getElementById("res").innerHTML = "Erro";
-    document.getElementById("passos").innerHTML = "Verifique a expressão";
+  } catch {
+    document.getElementById("res").innerHTML = "Erro!";
+    document.getElementById("passos").innerHTML = "Verifique a conta.";
   }
 }
 
