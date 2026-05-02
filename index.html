@@ -7,7 +7,6 @@
 
 <style>
 body {
-  margin: 0;
   font-family: Arial;
   background: linear-gradient(135deg, #4facfe, #00f2fe);
   display: flex;
@@ -20,11 +19,7 @@ body {
   background: white;
   padding: 20px;
   border-radius: 15px;
-  width: 320px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-h2 {
+  width: 340px;
   text-align: center;
 }
 
@@ -33,8 +28,6 @@ input {
   padding: 12px;
   font-size: 18px;
   margin-bottom: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
 }
 
 .grid {
@@ -48,16 +41,12 @@ button {
   font-size: 18px;
   border: none;
   border-radius: 10px;
+  cursor: pointer;
   background: #4CAF50;
   color: white;
-  cursor: pointer;
 }
 
-button:hover {
-  background: #45a049;
-}
-
-.clear {
+.apagar {
   background: red;
 }
 
@@ -74,11 +63,11 @@ button:hover {
 </head>
 
 <body>
-
 <div class="container">
+
 <h2>Calculadora</h2>
 
-<input id="exp" placeholder="Ex: -[5+(3-2)*4]">
+<input type="text" id="expressao">
 
 <div class="grid">
 <button onclick="add('7')">7</button>
@@ -110,55 +99,67 @@ button:hover {
 <br>
 
 <button onclick="calcular()">Calcular</button>
-<button class="clear" onclick="limpar()">Apagar</button>
+<button class="apagar" onclick="limpar()">C</button>
+<button onclick="apagarUm()">←</button>
 
-<div class="resultado" id="res"></div>
+<div class="resultado" id="resultado"></div>
 <div class="passos" id="passos"></div>
 
 </div>
 
 <script>
 
-function add(v) {
-  document.getElementById('exp').value += v;
+function add(valor){
+  document.getElementById("expressao").value += valor;
 }
 
-function limpar() {
-  document.getElementById('exp').value = "";
-  document.getElementById('res').innerHTML = "";
-  document.getElementById('passos').innerHTML = "";
+function limpar(){
+  document.getElementById("expressao").value = "";
+  document.getElementById("resultado").innerHTML = "";
+  document.getElementById("passos").innerHTML = "";
 }
 
-function normalizar(exp) {
-  return exp
-    .replace(/\[/g, "(")
-    .replace(/\]/g, ")")
-    .replace(/\{/g, "(")
-    .replace(/\}/g, ")");
+function apagarUm(){
+  let campo = document.getElementById("expressao");
+  campo.value = campo.value.slice(0, -1);
 }
 
-function calcular() {
-  let exp = document.getElementById("exp").value;
-  let passos = "<b>Passo a passo:</b><br>";
+function calcular(){
+  let exp = document.getElementById("expressao").value;
 
   try {
-    passos += "Expressão: " + exp + "<br>";
 
-    let expJS = normalizar(exp);
+    let conta = exp
+      .replace(/\[/g,"(")
+      .replace(/\]/g,")")
+      .replace(/\{/g,"(")
+      .replace(/\}/g,")");
 
-    let resultado = eval(expJS);
+    let passos = "<b>Passo a passo:</b><br>";
 
-    passos += "Resolvendo respeitando a ordem:<br>";
-    passos += "1) Parênteses / colchetes<br>";
-    passos += "2) Multiplicação e divisão<br>";
-    passos += "3) Soma e subtração<br>";
+    // MOSTRAR SÓ O QUE FOI USADO
+    if(exp.includes("(") || exp.includes("[") || exp.includes("{")){
+      passos += "1) Resolver parênteses / colchetes<br>";
+    }
 
-    document.getElementById("res").innerHTML = "Resultado: " + resultado;
+    if(exp.includes("*") || exp.includes("/")){
+      passos += "2) Multiplicação e divisão<br>";
+    }
+
+    if(exp.includes("+") || exp.includes("-")){
+      passos += "3) Soma e subtração<br>";
+    }
+
+    let resultado = Function("return " + conta)();
+
+    document.getElementById("resultado").innerHTML =
+      exp + " = " + resultado;
+
     document.getElementById("passos").innerHTML = passos;
 
   } catch {
-    document.getElementById("res").innerHTML = "Erro!";
-    document.getElementById("passos").innerHTML = "Verifique a conta.";
+    document.getElementById("resultado").innerHTML = "Erro";
+    document.getElementById("passos").innerHTML = "";
   }
 }
 
