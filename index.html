@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Educacional</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 340px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 12px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #4CAF50;
+      color: white;
+    }
+    .resultado {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .passos {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Calculadora Educacional</h2>
+
+    <input type="text" id="expressao" placeholder="Ex: 5+(-3)*2">
+
+    <div class="grid">
+      <button onclick="add('7')">7</button>
+      <button onclick="add('8')">8</button>
+      <button onclick="add('9')">9</button>
+      <button onclick="add('/')">÷</button>
+
+      <button onclick="add('4')">4</button>
+      <button onclick="add('5')">5</button>
+      <button onclick="add('6')">6</button>
+      <button onclick="add('*')">×</button>
+
+      <button onclick="add('1')">1</button>
+      <button onclick="add('2')">2</button>
+      <button onclick="add('3')">3</button>
+      <button onclick="add('-')">-</button>
+
+      <button onclick="add('0')">0</button>
+      <button onclick="add('(')">(</button>
+      <button onclick="add(')')">)</button>
+      <button onclick="add('+')">+</button>
+    </div>
+
+    <button onclick="calcular()">Calcular</button>
+
+    <div class="resultado" id="resultado"></div>
+    <div class="passos" id="passos"></div>
+  </div>
+
+  <script>
+    function add(valor) {
+      document.getElementById('expressao').value += valor;
+    }
+
+    function calcular() {
+      let exp = document.getElementById('expressao').value;
+      let passos = "<b>Passo a passo:</b><br>";
+
+      try {
+        passos += "1) Expressão original: " + exp + "<br>";
+
+        // Resolver parênteses simples
+        let parenteses = exp.match(/\(([^()]+)\)/);
+        if (parenteses) {
+          let dentro = parenteses[1];
+          let valor = Function('return ' + dentro)();
+          passos += "2) Resolver parênteses: (" + dentro + ") = " + valor + "<br>";
+          exp = exp.replace(/\(([^()]+)\)/, valor);
+        }
+
+        // Multiplicação e divisão
+        let multDiv = exp.match(/(-?\d+)([*/])(-?\d+)/);
+        if (multDiv) {
+          let a = Number(multDiv[1]);
+          let op = multDiv[2];
+          let b = Number(multDiv[3]);
+          let resultado = op === '*' ? a * b : a / b;
+          passos += `3) ${a} ${op} ${b} = ${resultado}<br>`;
+          exp = exp.replace(/(-?\d+)([*/])(-?\d+)/, resultado);
+        }
+
+        // Soma e subtração
+        let soma = Function('return ' + exp)();
+        passos += "4) Resultado final: " + soma;
+
+        document.getElementById('resultado').innerHTML = "Resultado: " + soma;
+        document.getElementById('passos').innerHTML = passos;
+      } catch (e) {
+        document.getElementById('resultado').innerHTML = "Erro";
+        document.getElementById('passos').innerHTML = "Verifique a expressão.";
+      }
+    }
+  </script>
+</body>
+</html>
