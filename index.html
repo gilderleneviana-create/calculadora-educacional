@@ -1,169 +1,56 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora Educacional</title>
-
-<style>
-body {
-  font-family: Arial;
-  background: linear-gradient(135deg, #4facfe, #00f2fe);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.container {
-  background: white;
-  padding: 20px;
-  border-radius: 15px;
-  width: 340px;
-  text-align: center;
-}
-
-input {
-  width: 100%;
-  padding: 12px;
-  font-size: 18px;
-  margin-bottom: 10px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-
-button {
-  padding: 12px;
-  font-size: 18px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  background: #4CAF50;
-  color: white;
-}
-
-.apagar {
-  background: red;
-}
-
-.resultado {
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-.passos {
-  margin-top: 10px;
-  font-size: 14px;
-}
-</style>
-</head>
-
-<body>
-<div class="container">
-
-<h2>Calculadora</h2>
-
-<input type="text" id="expressao">
-
-<div class="grid">
-<button onclick="add('7')">7</button>
-<button onclick="add('8')">8</button>
-<button onclick="add('9')">9</button>
-<button onclick="add('/')">÷</button>
-
-<button onclick="add('4')">4</button>
-<button onclick="add('5')">5</button>
-<button onclick="add('6')">6</button>
-<button onclick="add('*')">×</button>
-
-<button onclick="add('1')">1</button>
-<button onclick="add('2')">2</button>
-<button onclick="add('3')">3</button>
-<button onclick="add('-')">-</button>
-
-<button onclick="add('0')">0</button>
-<button onclick="add('(')">(</button>
-<button onclick="add(')')">)</button>
-<button onclick="add('+')">+</button>
-
-<button onclick="add('[')">[</button>
-<button onclick="add(']')">]</button>
-<button onclick="add('{')">{</button>
-<button onclick="add('}')">}</button>
-</div>
-
-<br>
-
-<button onclick="calcular()">Calcular</button>
-<button class="apagar" onclick="limpar()">C</button>
-<button onclick="apagarUm()">←</button>
-
-<div class="resultado" id="resultado"></div>
-<div class="passos" id="passos"></div>
-
-</div>
-
 <script>
-
-function add(valor){
-  document.getElementById("expressao").value += valor;
-}
-
-function limpar(){
-  document.getElementById("expressao").value = "";
-  document.getElementById("resultado").innerHTML = "";
-  document.getElementById("passos").innerHTML = "";
-}
-
-function apagarUm(){
-  let campo = document.getElementById("expressao");
-  campo.value = campo.value.slice(0, -1);
-}
-
 function calcular(){
-  let exp = document.getElementById("expressao").value;
+  let expOriginal = document.getElementById("expressao").value;
 
   try {
 
-    let conta = exp
+    let exp = expOriginal
       .replace(/\[/g,"(")
       .replace(/\]/g,")")
       .replace(/\{/g,"(")
-      .replace(/\}/g,")");
+      .replace(/\}/g,")")
+      .replace(/\)(\d)/g, ')*$1')
+      .replace(/(\d)\(/g, '$1*(');
 
     let passos = "<b>Passo a passo:</b><br>";
 
-    // MOSTRAR SÓ O QUE FOI USADO
-    if(exp.includes("(") || exp.includes("[") || exp.includes("{")){
-      passos += "1) Resolver parênteses / colchetes<br>";
+    // PASSO 1 — PARÊNTESES (só se tiver)
+    while(/\([^()]+\)/.test(exp)){
+      let dentro = exp.match(/\([^()]+\)/)[0];
+      let valor = Function("return " + dentro)();
+
+      passos += dentro + " = " + valor + "<br>";
+      exp = exp.replace(dentro, valor);
     }
 
-    if(exp.includes("*") || exp.includes("/")){
-      passos += "2) Multiplicação e divisão<br>";
+    // PASSO 2 — MULTIPLICAÇÃO / DIVISÃO (só se tiver)
+    while(/(-?\d+\.?\d*)([*/])(-?\d+\.?\d*)/.test(exp)){
+      let parte = exp.match(/(-?\d+\.?\d*)([*/])(-?\d+\.?\d*)/);
+      let a = Number(parte[1]);
+      let op = parte[2];
+      let b = Number(parte[3]);
+
+      let res = op === "*" ? a*b : a/b;
+
+      passos += `${a} ${op === "*" ? "×" : "÷"} ${b} = ${res}<br>`;
+      exp = exp.replace(parte[0], res);
     }
 
-    if(exp.includes("+") || exp.includes("-")){
-      passos += "3) Soma e subtração<br>";
+    // PASSO 3 — SOMA / SUBTRAÇÃO (sempre aparece se tiver)
+    if(/[+-]/.test(exp)){
+      let resultadoFinal = Function("return " + exp)();
+      passos += exp + " = " + resultadoFinal;
+      exp = resultadoFinal;
     }
-
-    let resultado = Function("return " + conta)();
 
     document.getElementById("resultado").innerHTML =
-      exp + " = " + resultado;
+      expOriginal + " = " + exp;
 
     document.getElementById("passos").innerHTML = passos;
 
   } catch {
-    document.getElementById("resultado").innerHTML = "Erro";
+    document.getElementById("resultado").innerHTML = "Erro na conta";
     document.getElementById("passos").innerHTML = "";
   }
 }
-
 </script>
-
-</body>
-</html>
