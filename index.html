@@ -5,13 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calculadora Educacional</title>
 
-<!-- biblioteca segura -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 
 <style>
 body{
   font-family: Arial;
-  background: linear-gradient(135deg,#4facfe,#00f2fe);
+  background: linear-gradient(135deg,#667eea,#764ba2);
   display:flex;
   justify-content:center;
   align-items:center;
@@ -24,13 +23,20 @@ body{
   border-radius:15px;
   width:340px;
   text-align:center;
+  box-shadow:0 10px 20px rgba(0,0,0,0.2);
+}
+
+h2{
+  color:#333;
 }
 
 input{
   width:100%;
-  padding:10px;
+  padding:12px;
   font-size:18px;
   margin-bottom:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
 }
 
 .grid{
@@ -44,18 +50,24 @@ button{
   font-size:18px;
   border:none;
   border-radius:10px;
-  background:#4CAF50;
+  background:#6c63ff;
   color:white;
   cursor:pointer;
+  transition:0.2s;
+}
+
+button:hover{
+  background:#574fd6;
 }
 
 .btn-red{
-  background:red;
+  background:#ff4d4d;
 }
 
 .resultado{
   margin-top:10px;
   font-weight:bold;
+  font-size:18px;
 }
 
 .passos{
@@ -71,7 +83,7 @@ button{
 <div class="container">
 <h2>Calculadora</h2>
 
-<input id="exp" placeholder="Ex: 4-5*(-4+5)*5">
+<input id="exp" placeholder="Ex: 4-5(-4+5)5">
 
 <div class="grid">
 <button onclick="add('7')">7</button>
@@ -128,14 +140,13 @@ function apagarUm(){
   e.value = e.value.slice(0,-1);
 }
 
-function ajustarExpressao(exp){
-  // trocar colchetes e chaves por parênteses
+// Ajusta expressão automaticamente
+function ajustar(exp){
   exp = exp.replace(/\[/g,"(")
            .replace(/\]/g,")")
            .replace(/\{/g,"(")
            .replace(/\}/g,")");
 
-  // adicionar multiplicação automática (tipo 5(3+2))
   exp = exp.replace(/(\d)(\()/g,"$1*$2");
   exp = exp.replace(/(\))(\d)/g,"$1*$2");
 
@@ -146,32 +157,40 @@ function calcular(){
   let original = document.getElementById("exp").value;
 
   try{
-    let exp = ajustarExpressao(original);
-
+    let exp = ajustar(original);
     let passos = "<b>Passo a passo:</b><br>";
 
-    passos += "Expressão: " + original + "<br>";
-
-    if(exp.includes("(")){
-      passos += "1) Resolver parênteses<br>";
+    // PASSO 1 - Parênteses
+    let temp = exp;
+    while(/\([^()]+\)/.test(temp)){
+      let parte = temp.match(/\([^()]+\)/)[0];
+      let valor = math.evaluate(parte);
+      passos += parte + " = " + valor + "<br>";
+      temp = temp.replace(parte, valor);
     }
 
-    if(exp.includes("*") || exp.includes("/")){
-      passos += "2) Multiplicação / divisão<br>";
+    // PASSO 2 - Multiplicação/divisão (só se tiver)
+    if(/[*\/]/.test(temp)){
+      let antes = temp;
+      temp = math.evaluate(temp).toString();
+      passos += antes + " = " + temp + "<br>";
     }
 
-    if(exp.includes("+") || exp.includes("-")){
-      passos += "3) Soma / subtração<br>";
+    // PASSO 3 - Soma/subtração (só se tiver)
+    if(/[+-]/.test(temp)){
+      let antes = temp;
+      temp = math.evaluate(temp).toString();
+      passos += antes + " = " + temp + "<br>";
     }
 
-    let resultado = math.evaluate(exp);
+    document.getElementById("res").innerHTML =
+      original + " = " + temp;
 
-    document.getElementById("res").innerHTML = "Resultado: " + resultado;
     document.getElementById("passos").innerHTML = passos;
 
-  }catch(e){
+  }catch{
     document.getElementById("res").innerHTML = "Erro na conta";
-    document.getElementById("passos").innerHTML = "Verifique os sinais.";
+    document.getElementById("passos").innerHTML = "";
   }
 }
 
