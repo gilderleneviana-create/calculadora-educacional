@@ -1,130 +1,190 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculadora Educacional</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora Educacional</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #4facfe, #00f2fe);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 
-    .calculadora {
-      background: white;
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      width: 280px;
-    }
+<style>
+body {
+  font-family: Arial;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 
-    .tela {
-      width: 100%;
-      height: 50px;
-      font-size: 22px;
-      margin-bottom: 15px;
-      text-align: right;
-      padding: 10px;
-      border: none;
-      background: #f3f3f3;
-      border-radius: 10px;
-    }
+.container {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  width: 340px;
+}
 
-    .botoes {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
+input {
+  width: 100%;
+  padding: 10px;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
 
-    button {
-      padding: 15px;
-      font-size: 18px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 5px;
+}
 
-    button:hover {
-      transform: scale(1.05);
-    }
+button {
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  background: #4CAF50;
+  color: white;
+}
 
-    .num {
-      background: #e0e0e0;
-    }
+button:hover {
+  background: #45a049;
+}
 
-    .op {
-      background: #4facfe;
-      color: white;
-    }
+.igual {
+  background: #2196F3;
+}
 
-    .igual {
-      background: #00c853;
-      color: white;
-      grid-column: span 2;
-    }
+.apagar {
+  background: #ff9800;
+}
 
-    .limpar {
-      background: #ff5252;
-      color: white;
-    }
-  </style>
+.limpar {
+  background: #f44336;
+}
+
+.resultado {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.passos {
+  font-size: 14px;
+  margin-top: 10px;
+}
+</style>
 </head>
 
 <body>
 
-  <div class="calculadora">
-    <input type="text" id="tela" class="tela" disabled>
+<div class="container">
+<h3>Calculadora Educacional</h3>
 
-    <div class="botoes">
-      <button class="limpar" onclick="limpar()">C</button>
-      <button class="op" onclick="adicionar('/')">÷</button>
-      <button class="op" onclick="adicionar('*')">×</button>
-      <button class="op" onclick="adicionar('-')">−</button>
+<input id="exp" placeholder="Ex: -(3+[2-5])*2">
 
-      <button class="num" onclick="adicionar('7')">7</button>
-      <button class="num" onclick="adicionar('8')">8</button>
-      <button class="num" onclick="adicionar('9')">9</button>
-      <button class="op" onclick="adicionar('+')">+</button>
+<div class="grid">
+<button onclick="add('7')">7</button>
+<button onclick="add('8')">8</button>
+<button onclick="add('9')">9</button>
+<button onclick="add('/')">÷</button>
 
-      <button class="num" onclick="adicionar('4')">4</button>
-      <button class="num" onclick="adicionar('5')">5</button>
-      <button class="num" onclick="adicionar('6')">6</button>
+<button onclick="add('4')">4</button>
+<button onclick="add('5')">5</button>
+<button onclick="add('6')">6</button>
+<button onclick="add('*')">×</button>
 
-      <button class="num" onclick="adicionar('1')">1</button>
-      <button class="num" onclick="adicionar('2')">2</button>
-      <button class="num" onclick="adicionar('3')">3</button>
+<button onclick="add('1')">1</button>
+<button onclick="add('2')">2</button>
+<button onclick="add('3')">3</button>
+<button onclick="add('-')">-</button>
 
-      <button class="num" onclick="adicionar('0')">0</button>
-      <button class="num" onclick="adicionar('.')">.</button>
-      <button class="igual" onclick="calcular()">=</button>
-    </div>
-  </div>
+<button onclick="add('0')">0</button>
+<button onclick="add('+')">+</button>
+<button onclick="add('.')">.</button>
+<button class="apagar" onclick="apagar()">⌫</button>
 
-  <script>
-    function adicionar(valor) {
-      document.getElementById('tela').value += valor;
-    }
+<button onclick="add('(')">(</button>
+<button onclick="add(')')">)</button>
+<button onclick="add('[')">[</button>
+<button onclick="add(']')">]</button>
 
-    function limpar() {
-      document.getElementById('tela').value = "";
-    }
+<button onclick="add('{')">{</button>
+<button onclick="add('}')">}</button>
+<button class="limpar" onclick="limpar()">C</button>
+<button class="igual" onclick="calcular()">=</button>
+</div>
 
-    function calcular() {
-      try {
-        let resultado = eval(document.getElementById('tela').value);
-        document.getElementById('tela').value = resultado;
-      } catch {
-        alert("Erro na conta!");
-      }
-    }
-  </script>
+<div class="resultado" id="res"></div>
+<div class="passos" id="passos"></div>
+
+</div>
+
+<script>
+
+function add(v){
+  document.getElementById("exp").value += v;
+}
+
+function limpar(){
+  document.getElementById("exp").value = "";
+}
+
+function apagar(){
+  let campo = document.getElementById("exp");
+  campo.value = campo.value.slice(0,-1);
+}
+
+// converter colchetes/chaves
+function normalizar(exp){
+  return exp
+    .replace(/\[/g,"(")
+    .replace(/\]/g,")")
+    .replace(/{/g,"(")
+    .replace(/}/g,")");
+}
+
+// explicar sinais
+function explicarSinais(exp){
+  let texto = "";
+
+  if(exp.includes("--")) texto += "• Menos com menos vira mais<br>";
+  if(exp.includes("+-")) texto += "• Mais com menos continua menos<br>";
+  if(exp.includes("-+")) texto += "• Menos com mais continua menos<br>";
+
+  return texto;
+}
+
+function calcular(){
+  let exp = document.getElementById("exp").value;
+  let passos = "<b>Passo a passo:</b><br>";
+
+  try{
+
+    passos += "1) Expressão: " + exp + "<br>";
+
+    // explicar sinais
+    passos += explicarSinais(exp);
+
+    // normalizar
+    let normal = normalizar(exp);
+    passos += "2) Converter [] {} → (): " + normal + "<br>";
+
+    passos += "3) Resolver respeitando ordem:<br>";
+    passos += "• Parênteses → Multiplicação/Divisão → Soma/Subtração<br>";
+
+    let resultado = math.evaluate(normal);
+
+    passos += "4) Resultado final: " + resultado;
+
+    document.getElementById("res").innerHTML = "Resultado: " + resultado;
+    document.getElementById("passos").innerHTML = passos;
+
+  }catch(e){
+    document.getElementById("res").innerHTML = "Erro";
+    document.getElementById("passos").innerHTML = "Verifique a expressão";
+  }
+}
+
+</script>
 
 </body>
 </html>
